@@ -8,6 +8,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "patient")
@@ -16,14 +22,32 @@ public class Patient {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long patientId;
 
+	@NotBlank(message = "Patient name is required")
+	@Size(max = 50, message = "Patient name should not exceed 50 characters")
 	private String name;
+
+	@NotNull(message = "Age cannot be null")
+	@Positive(message = "Age must be positive")
 	private int age;
+
+	@NotBlank(message = "Blood group is required")
+	@Pattern(regexp = "^(A|B|AB|O)[+-]$", message = "Invalid blood group format")
 	private String bloodGroup;
+
+	@NotBlank(message = "Gender is required")
+	@Pattern(regexp = "Male|Female|Other", message = "Gender must be Male, Female, or Other")
 	private String gender;
+
+	@Past(message = "Date of Birth must be in the past")
+	@NotNull(message = "Date of birth is required")
 	private LocalDate dateOfBirth;
+
+	@Size(max = 500, message = "Medical history should not exceed 500 characters")
 	private String medicalHistory;
 	@Email(message = "Invalid email format")
 	private String email;
+
+	@Pattern(regexp = "^\\d{10}$", message = "Contact number must be a 10-digit number")
 	private String contactDetails;
 
 	public Patient() {

@@ -59,7 +59,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
 	}
 
 	@Override
-	public String updateSchedule(Long doctorId, DoctorScheduleDTO dto) {
+	public String updateSchedule(Long doctorId, DoctorScheduleDTO dto) throws ScheduleNotFoundException{
 		DoctorSchedule existingSchedule = repository.findByDoctorId(doctorId)
 				.orElseThrow(() -> new ScheduleNotFoundException("Schedule not found for doctor ID: " + doctorId));
 

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hams.patient.model.Patient;
 import com.hams.patient.service.PatientService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/patients")
 public class PatientController {
@@ -23,15 +25,15 @@ public class PatientController {
 	private PatientService service;
 
 	@PostMapping("/register")
-	public String registerPatient(@RequestBody Patient patient) {
+	public String registerPatient(@Valid @RequestBody Patient patient) {
 		service.registerPatient(patient);
-		return "Patient created";
+		return "Patient registered successfully";
 	}
 
 	@PutMapping("/update/{patientId}")
 	public String updatePatient(@PathVariable Long patientId, @RequestBody Patient patient) {
 		service.updatePatient(patientId, patient);
-		return "Patient updated";
+		return "Patient updated successfully.";
 	}
 
 	@GetMapping("/fetchById/{patientId}")

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.hams.medical.dto.MedicalHistoryPatientResponseDTO;
 import com.hams.medical.dto.Patient;
+import com.hams.medical.exception.CustomGlobalExceptionHandler;
 import com.hams.medical.exception.HistoryNotFoundException;
 import com.hams.medical.exception.PatientNotFoundException;
 import com.hams.medical.feignclient.PatientClient;
@@ -20,6 +21,8 @@ import feign.FeignException;
 @Service
 public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 
+	private final CustomGlobalExceptionHandler customGlobalExceptionHandler;
+
 	private static final Logger logger = LoggerFactory.getLogger(MedicalHistoryServiceImpl.class);
 
 	@Autowired
@@ -28,7 +31,12 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 	@Autowired
 	private PatientClient patientClient;
 
-	public MedicalHistoryPatientResponseDTO getMedicalHistoryWithPatient(Long patientId) {
+	MedicalHistoryServiceImpl(CustomGlobalExceptionHandler customGlobalExceptionHandler) {
+		this.customGlobalExceptionHandler = customGlobalExceptionHandler;
+	}
+
+	public MedicalHistoryPatientResponseDTO getMedicalHistoryWithPatient(Long patientId)
+			throws PatientNotFoundException {
 		logger.info("Fetching medical history for patient ID: {}", patientId);
 
 		try {
@@ -43,7 +51,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 	}
 
 	@Override
-	public String saveHistory(MedicalHistory dto) {
+	public String saveHistory(MedicalHistory dto) throws PatientNotFoundException {
 		logger.info("Saving medical history for patient ID: {}", dto.getPatientId());
 
 		try {
@@ -66,7 +74,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 	}
 
 	@Override
-	public String updateHistory(Long id, MedicalHistory updated) {
+	public String updateHistory(Long id, MedicalHistory updated) throws HistoryNotFoundException {
 		logger.info("Updating medical history for ID: {}", id);
 
 		MedicalHistory existing = repository.findById(id).orElseThrow(() -> {
@@ -85,7 +93,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 	}
 
 	@Override
-	public MedicalHistory getById(Long id) {
+	public MedicalHistory getById(Long id) throws HistoryNotFoundException {
 		logger.info("Fetching medical history for ID: {}", id);
 
 		return repository.findById(id).orElseThrow(() -> {
@@ -95,7 +103,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 	}
 
 	@Override
-	public List<MedicalHistory> getByPatientId(Long patientId) {
+	public List<MedicalHistory> getByPatientId(Long patientId) throws HistoryNotFoundException {
 		logger.info("Fetching medical history for patient ID: {}", patientId);
 
 		List<MedicalHistory> list = repository.findByPatientId(patientId);
@@ -114,7 +122,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 	}
 
 	@Override
-	public String deleteById(Long id) {
+	public String deleteById(Long id) throws HistoryNotFoundException {
 		logger.info("Attempting to delete medical history for ID: {}", id);
 
 		if (!repository.existsById(id)) {

@@ -28,7 +28,7 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
-	public String updatePatient(Long patientId, Patient updatedPatient) {
+	public String updatePatient(Long patientId, Patient updatedPatient) throws PatientNotFoundException{
 		logger.info("Updating patient with ID: {}", patientId);
 
 		Patient existing = repository.findById(patientId).orElseThrow(() -> {
@@ -51,7 +51,7 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
-	public Patient getPatientById(Long id) {
+	public Patient getPatientById(Long id)  throws PatientNotFoundException{
 		logger.info("Fetching patient details for ID: {}", id);
 		return repository.findById(id).orElseThrow(() -> {
 			logger.error("Patient not found with ID: {}", id);
@@ -66,7 +66,7 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
-	public String deletePatient(Long id) {
+	public String deletePatient(Long id)  throws PatientNotFoundException{
 		logger.info("Attempting to delete patient with ID: {}", id);
 
 		if (!repository.existsById(id)) {
