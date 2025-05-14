@@ -1,16 +1,20 @@
 package com.hams.appointment.service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.hams.appointment.dto.AppointmentDTO;
-import com.hams.appointment.dto.DoctorScheduleDTO;
+import com.hams.appointment.dto.AppointmentPatientRequestDTO;
+import com.hams.appointment.dto.AppointmentPatientResponseDTO;
+import com.hams.appointment.dto.DoctorScheduleToAppointmentDTO;
+import com.hams.appointment.dto.PatientProfile;
 import com.hams.appointment.exception.AppointmentNotFoundException;
+import com.hams.appointment.exception.DoctorNotAvailableException;
 import com.hams.appointment.exception.InvalidDoctorException;
 import com.hams.appointment.exception.InvalidPatientException;
 import com.hams.appointment.feignclient.DoctorClient;
@@ -18,13 +22,13 @@ import com.hams.appointment.feignclient.PatientClient;
 import com.hams.appointment.model.Appointment;
 import com.hams.appointment.repository.AppointmentRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
 
-	private static final Logger logger = LoggerFactory.getLogger(AppointmentServiceImpl.class);
-
 	@Autowired
-	private AppointmentRepository repository;
+	private AppointmentRepository repo;
 
 	@Autowired
 	private PatientClient patientClient;
@@ -33,92 +37,148 @@ public class AppointmentServiceImpl implements AppointmentService {
 	private DoctorClient doctorClient;
 
 	@Override
-	public Appointment bookAppointment(AppointmentDTO dto) {
-		logger.info("Booking appointment for Patient ID: {}, Doctor ID: {}", dto.getPatientId(), dto.getDoctorId());
+	public String saveAppointment(AppointmentPatientRequestDTO requestDTO) {
+		AppointmentDTO dto = requestDTO.getAppointment();
 
-		// Validate patient
+		// 1. Validate Patient
+		PatientProfile patient;
 		try {
-			patientClient.getPatientById(dto.getPatientId());
+			patient = patientClient.getPatientById(dto.getPatientId());
 		} catch (Exception e) {
-			logger.error("Invalid Patient ID: {}", dto.getPatientId(), e);
 			throw new InvalidPatientException("Invalid Patient ID: " + dto.getPatientId());
 		}
 
-		// Validate doctor
+		// 2. Validate Doctor
+		DoctorScheduleToAppointmentDTO doctor;
 		try {
-			doctorClient.getDoctorScheduleById(dto.getDoctorId());
+			doctor = doctorClient.getDoctorById(dto.getDoctorId());
 		} catch (Exception e) {
-			List<DoctorScheduleDTO> doctors = doctorClient.getAllDoctors();
-			logger.error("Invalid Doctor ID: {}. Available Doctor IDs: {}", dto.getDoctorId(),
-					doctors.stream().map(DoctorScheduleDTO::getDoctorId).collect(Collectors.toList()), e);
 			throw new InvalidDoctorException("Invalid Doctor ID: " + dto.getDoctorId());
 		}
 
-		// Check if requested appointmentDate is available in doctor's available slots
-		List<java.time.LocalDateTime> availableSlots = doctorClient.getAvailableTimeSlots(dto.getDoctorId());
-		if (!availableSlots.contains(dto.getAppointmentDate())) {
-			logger.warn("Requested slot {} is not available for Doctor ID: {}", dto.getAppointmentDate(),
-					dto.getDoctorId());
-			throw new InvalidDoctorException("Requested slot is not available for the selected doctor.");
+		// 3. Check Doctor Availability
+		LocalDateTime appointmentDateTime = dto.getAppointmentDateTime();
+		DayOfWeek appointmentDay = appointmentDateTime.getDayOfWeek(); // MONDAY, TUESDAY
+		String dayName = appointmentDay.name().charAt(0) + appointmentDay.name().substring(1).toLowerCase(); // "Monday"
+		String timeString = appointmentDateTime.toLocalTime().toString().substring(0, 5); // "HH:mm"
+
+		boolean isDayAvailable = doctor.getAvailableDays().contains(dayName);
+		boolean isTimeAvailable = doctor.getAvailableTime().contains(timeString);
+
+		if (!isDayAvailable || !isTimeAvailable) {
+			throw new DoctorNotAvailableException("Doctor is not available on " + dayName + " at " + timeString);
 		}
 
-		// Proceed with booking
-		Appointment appointment = new Appointment();
-		appointment.setPatientId(dto.getPatientId());
-		appointment.setDoctorId(dto.getDoctorId());
-		appointment.setAppointmentDate(dto.getAppointmentDate());
-		appointment.setStatus(dto.getStatus());
-
-		logger.info("Appointment booked successfully: {}", appointment);
-		return repository.save(appointment);
+		// 4. Save Appointment
+		Appointment a = new Appointment();
+		a.setPatientId(dto.getPatientId());
+		a.setDoctorId(dto.getDoctorId());
+		a.setAppointmentDateTime(dto.getAppointmentDateTime());
+		a.setReason(dto.getReason());
+		a.setStatus(dto.getStatus());
+		repo.save(a);
+		return "Appointment Saved Successfully";
 	}
 
 	@Override
-	public Appointment updateAppointment(Long id, AppointmentDTO dto) {
-		logger.info("Updating appointment with ID: {}", id);
-
-		Appointment existing = repository.findById(id)
-				.orElseThrow(() -> new AppointmentNotFoundException("Appointment not found with ID: " + id));
-
-		try {
-			patientClient.getPatientById(dto.getPatientId());
-		} catch (Exception e) {
-			logger.error("Invalid Patient ID: {}", dto.getPatientId(), e);
-			throw new InvalidPatientException("Invalid Patient ID: " + dto.getPatientId());
-		}
-
-		try {
-			doctorClient.getDoctorScheduleById(dto.getDoctorId());
-		} catch (Exception e) {
-			logger.error("Invalid Doctor ID: {}", dto.getDoctorId(), e);
-			throw new InvalidDoctorException("Invalid Doctor ID: " + dto.getDoctorId());
-		}
-
-		existing.setPatientId(dto.getPatientId());
-		existing.setDoctorId(dto.getDoctorId());
-		existing.setAppointmentDate(dto.getAppointmentDate());
-		existing.setStatus(dto.getStatus());
-
-		logger.info("Appointment updated successfully: {}", existing);
-		return repository.save(existing);
+	public String updateAppointment(long id, AppointmentDTO dto) {
+		Appointment a = repo.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Invalid ID"));
+		a.setPatientId(dto.getPatientId());
+		a.setDoctorId(dto.getDoctorId());
+		a.setAppointmentDateTime(dto.getAppointmentDateTime());
+		a.setReason(dto.getReason());
+		a.setStatus(dto.getStatus());
+		repo.save(a);
+		return "Appointment Updated";
 	}
 
 	@Override
-	public void cancelAppointment(Long id) {
-		logger.info("Cancelling appointment with ID: {}", id);
+	public List<AppointmentPatientResponseDTO> getAllAppointments() {
+		List<Appointment> list = repo.findAll();
+		List<AppointmentPatientResponseDTO> dtos = new ArrayList<>();
+		for (Appointment a : list) {
+			AppointmentDTO dto = new AppointmentDTO();
+			dto.setId(a.getId());
+			dto.setPatientId(a.getPatientId());
+			dto.setDoctorId(a.getDoctorId());
+			dto.setAppointmentDateTime(a.getAppointmentDateTime());
+			dto.setReason(a.getReason());
+			dto.setStatus(a.getStatus());
 
-		Appointment appointment = repository.findById(id)
-				.orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + id));
-		appointment.setStatus("Cancelled");
+			PatientProfile p = patientClient.getPatientById(a.getPatientId());
+			DoctorScheduleToAppointmentDTO d = doctorClient.getDoctorById(a.getDoctorId());
 
-		logger.info("Appointment cancelled successfully: {}", appointment);
-		repository.save(appointment);
+			AppointmentPatientResponseDTO full = new AppointmentPatientResponseDTO();
+			full.setAppointment(dto);
+			full.setPatient(p);
+			full.setDoctor(d);
+			dtos.add(full);
+		}
+		return dtos;
 	}
 
 	@Override
-	public Appointment getAppointmentById(Long id) {
-		logger.info("Fetching appointment with ID: {}", id);
-		return repository.findById(id)
-				.orElseThrow(() -> new AppointmentNotFoundException("Appointment not found: " + id));
+	public AppointmentPatientResponseDTO getAppointmentById(long id) {
+		Appointment a = repo.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Invalid ID"));
+		AppointmentDTO dto = new AppointmentDTO();
+		dto.setId(a.getId());
+		dto.setPatientId(a.getPatientId());
+		dto.setDoctorId(a.getDoctorId());
+		dto.setAppointmentDateTime(a.getAppointmentDateTime());
+		dto.setReason(a.getReason());
+		dto.setStatus(a.getStatus());
+
+		PatientProfile p = patientClient.getPatientById(a.getPatientId());
+		DoctorScheduleToAppointmentDTO d = doctorClient.getDoctorById(a.getDoctorId());
+
+		AppointmentPatientResponseDTO full = new AppointmentPatientResponseDTO();
+		full.setAppointment(dto);
+		full.setPatient(p);
+		full.setDoctor(d);
+		return full;
+	}
+
+	@Override
+	public List<AppointmentPatientResponseDTO> getAppointmentsByDoctorId(long doctorId) {
+		List<Appointment> list = repo.findByDoctorId(doctorId);
+		if (list.isEmpty()) {
+			throw new AppointmentNotFoundException("No appointments found for Doctor ID: " + doctorId);
+		}
+		List<AppointmentPatientResponseDTO> dtos = new ArrayList<>();
+		for (Appointment a : list) {
+			AppointmentDTO dto = new AppointmentDTO();
+			dto.setId(a.getId());
+			dto.setPatientId(a.getPatientId());
+			dto.setDoctorId(a.getDoctorId());
+			dto.setAppointmentDateTime(a.getAppointmentDateTime());
+			dto.setReason(a.getReason());
+			dto.setStatus(a.getStatus());
+
+			PatientProfile p = patientClient.getPatientById(a.getPatientId());
+			DoctorScheduleToAppointmentDTO d = doctorClient.getDoctorById(a.getDoctorId());
+
+			AppointmentPatientResponseDTO full = new AppointmentPatientResponseDTO();
+			full.setAppointment(dto);
+			full.setPatient(p);
+			full.setDoctor(d);
+			dtos.add(full);
+		}
+		return dtos;
+	}
+
+	@Transactional
+	@Override
+	public String deleteAppointment(long id) {
+		if (!repo.existsById(id)) {
+			throw new AppointmentNotFoundException("Appointment not found for ID: " + id);
+		}
+		repo.deleteById(id);
+		// logger.info("Appointment deleted successfully for ID: {}", id);
+		return "Appointment Deleted Successfully";
+	}
+
+	@Override
+	public List<DoctorScheduleToAppointmentDTO> getDoctorsBySpecialization(String specialization) {
+		return doctorClient.getDoctorsBySpecialization(specialization);
 	}
 }

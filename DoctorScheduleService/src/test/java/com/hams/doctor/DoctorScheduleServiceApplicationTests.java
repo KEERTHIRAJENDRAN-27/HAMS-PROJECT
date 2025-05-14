@@ -2,27 +2,26 @@ package com.hams.doctor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.hams.doctor.dto.DoctorScheduleDTO;
 import com.hams.doctor.exception.DoctorAlreadyExistsException;
 import com.hams.doctor.exception.ScheduleNotFoundException;
+import com.hams.doctor.feignclient.AppointmentClient;
 import com.hams.doctor.model.DoctorSchedule;
 import com.hams.doctor.repository.DoctorScheduleRepository;
 import com.hams.doctor.service.DoctorScheduleServiceImpl;
@@ -30,99 +29,118 @@ import com.hams.doctor.service.DoctorScheduleServiceImpl;
 @SpringBootTest
 class DoctorScheduleServiceApplicationTests {
 
-	@Mock
-	private DoctorScheduleRepository repository;
-
 	@InjectMocks
-	private DoctorScheduleServiceImpl service;
+	private DoctorScheduleServiceImpl doctorScheduleService;
 
-	private DoctorScheduleDTO scheduleDTO;
-	private DoctorSchedule schedule;
+	@Mock
+	private DoctorScheduleRepository doctorScheduleRepository;
+
+	@Mock
+	private AppointmentClient appointmentClient;
+
+	private DoctorScheduleDTO doctorScheduleDTO;
 
 	@BeforeEach
-	void setUp() {
-		scheduleDTO = new DoctorScheduleDTO();
-		scheduleDTO.setDoctorId(1L);
-		scheduleDTO.setDoctorName("Dr. John Doe");
-		scheduleDTO.setSpecialization("Cardiology");
-		scheduleDTO.setAvailableTimeSlots(Arrays.asList(LocalDateTime.now()));
+	public void setup() {
+		MockitoAnnotations.openMocks(this);
 
-		schedule = new DoctorSchedule();
+		// Set up sample data for test
+		doctorScheduleDTO = new DoctorScheduleDTO();
+		doctorScheduleDTO.setDoctorId(1L);
+		doctorScheduleDTO.setDoctorName("Dr. Smith");
+		doctorScheduleDTO.setSpecialization("Cardiology");
+		doctorScheduleDTO.setAvailableDays(Arrays.asList("Monday", "Tuesday"));
+		doctorScheduleDTO.setAvailableTime("09:00 - 17:00");
+	}
+
+	@Test
+	public void testAddSchedule_Success() {
+		DoctorSchedule schedule = new DoctorSchedule();
 		schedule.setDoctorId(1L);
-		schedule.setDoctorName("Dr. John Doe");
-		schedule.setSpecialization("Cardiology");
-		schedule.setAvailableTimeSlots("2025-05-12T10:00");
+		when(doctorScheduleRepository.findByDoctorId(1L)).thenReturn(Optional.empty());
+		when(doctorScheduleRepository.save(any(DoctorSchedule.class))).thenReturn(schedule);
+
+		String result = doctorScheduleService.addSchedule(doctorScheduleDTO);
+
+		assertEquals("Doctor schedule added successfully", result);
 	}
 
 	@Test
-	void testAddSchedule_Success() {
-		when(repository.findByDoctorId(1L)).thenReturn(Optional.empty());
-		when(repository.save(any(DoctorSchedule.class))).thenReturn(schedule);
+	public void testAddSchedule_DoctorAlreadyExists() {
+		DoctorSchedule schedule = new DoctorSchedule();
+		schedule.setDoctorId(1L);
+		when(doctorScheduleRepository.findByDoctorId(1L)).thenReturn(Optional.of(schedule));
 
-		String result = service.addSchedule(scheduleDTO);
-		assertEquals("Doctor schedule registered successfully.", result);
+		assertThrows(DoctorAlreadyExistsException.class, () -> {
+			doctorScheduleService.addSchedule(doctorScheduleDTO);
+		});
 	}
 
 	@Test
-	void testAddSchedule_DoctorAlreadyExists() {
-		when(repository.findByDoctorId(1L)).thenReturn(Optional.of(schedule));
+	public void testUpdateSchedule_Success() {
+		DoctorSchedule existingSchedule = new DoctorSchedule();
+		existingSchedule.setDoctorId(1L);
+		when(doctorScheduleRepository.findById(1L)).thenReturn(Optional.of(existingSchedule));
 
-		assertThrows(DoctorAlreadyExistsException.class, () -> service.addSchedule(scheduleDTO));
+		String result = doctorScheduleService.updateSchedule(1L, doctorScheduleDTO);
+
+		assertEquals("Doctor schedule updated successfully", result);
 	}
 
 	@Test
-	void testUpdateSchedule_Success() {
-		when(repository.findByDoctorId(1L)).thenReturn(Optional.of(schedule));
-		when(repository.save(any(DoctorSchedule.class))).thenReturn(schedule);
+	public void testUpdateSchedule_ScheduleNotFound() {
+		when(doctorScheduleRepository.findById(1L)).thenReturn(Optional.empty());
 
-		String result = service.updateSchedule(1L, scheduleDTO);
-		assertEquals("Doctor schedule updated successfully.", result);
+		assertThrows(ScheduleNotFoundException.class, () -> {
+			doctorScheduleService.updateSchedule(1L, doctorScheduleDTO);
+		});
 	}
 
 	@Test
-	void testUpdateSchedule_NotFound() {
-		when(repository.findByDoctorId(1L)).thenReturn(Optional.empty());
+	public void testIsDoctorAvailable_Success() {
+		DoctorSchedule schedule = new DoctorSchedule();
+		schedule.setDoctorId(1L);
+		schedule.setAvailableDays(Arrays.asList("Monday", "Tuesday"));
+		schedule.setAvailableTime("09:00 - 17:00");
+		when(doctorScheduleRepository.findByDoctorId(1L)).thenReturn(Optional.of(schedule));
 
-		assertThrows(ScheduleNotFoundException.class, () -> service.updateSchedule(1L, scheduleDTO));
+		LocalDateTime requestedTime = LocalDateTime.of(2025, 5, 13, 10, 0, 0, 0); // Tuesday, 10 AM
+		boolean isAvailable = doctorScheduleService.isDoctorAvailable(1L, requestedTime);
+
+		assertTrue(isAvailable);
 	}
 
 	@Test
-	void testGetById_Success() {
-		when(repository.findById(1L)).thenReturn(Optional.of(schedule));
+	public void testIsDoctorAvailable_NotAvailable() {
+		DoctorSchedule schedule = new DoctorSchedule();
+		schedule.setDoctorId(1L);
+		schedule.setAvailableDays(Arrays.asList("Monday", "Tuesday"));
+		schedule.setAvailableTime("09:00 - 17:00");
+		when(doctorScheduleRepository.findByDoctorId(1L)).thenReturn(Optional.of(schedule));
 
-		DoctorSchedule result = service.getById(1L);
-		assertNotNull(result);
+		LocalDateTime requestedTime = LocalDateTime.of(2025, 5, 13, 18, 0, 0, 0); // Tuesday, 6 PM
+		boolean isAvailable = doctorScheduleService.isDoctorAvailable(1L, requestedTime);
+
+		assertFalse(isAvailable);
+	}
+
+	@Test
+	public void testGetDoctorById_Success() {
+		DoctorSchedule schedule = new DoctorSchedule();
+		schedule.setDoctorId(1L);
+		when(doctorScheduleRepository.findById(1L)).thenReturn(Optional.of(schedule));
+
+		DoctorSchedule result = doctorScheduleService.getById(1L);
+
 		assertEquals(1L, result.getDoctorId());
 	}
 
 	@Test
-	void testGetById_NotFound() {
-		when(repository.findById(1L)).thenReturn(Optional.empty());
+	public void testGetDoctorById_ScheduleNotFound() {
+		when(doctorScheduleRepository.findById(1L)).thenReturn(Optional.empty());
 
-		assertThrows(ScheduleNotFoundException.class, () -> service.getById(1L));
-	}
-
-	@Test
-	void testGetAll_Success() {
-		when(repository.findAll()).thenReturn(Arrays.asList(schedule));
-
-		List<DoctorSchedule> result = service.getAll();
-		assertFalse(result.isEmpty());
-	}
-
-	@Test
-	void testDeleteById_Success() {
-		when(repository.findById(1L)).thenReturn(Optional.of(schedule));
-
-		String result = service.deleteById(1L);
-		assertEquals("Doctor schedule deleted successfully.", result);
-		verify(repository, times(1)).delete(schedule);
-	}
-
-	@Test
-	void testDeleteById_NotFound() {
-		when(repository.findById(1L)).thenReturn(Optional.empty());
-
-		assertThrows(ScheduleNotFoundException.class, () -> service.deleteById(1L));
+		assertThrows(ScheduleNotFoundException.class, () -> {
+			doctorScheduleService.getById(1L);
+		});
 	}
 }

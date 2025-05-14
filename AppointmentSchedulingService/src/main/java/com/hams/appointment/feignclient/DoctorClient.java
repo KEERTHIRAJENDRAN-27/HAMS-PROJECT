@@ -7,18 +7,20 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.hams.appointment.dto.DoctorScheduleDTO;
+import com.hams.appointment.dto.DoctorScheduleToAppointmentDTO;
 
-@FeignClient(value = "DOCTORSCHEDULESERVICE", url = "http://localhost:8003/doctor")
+@FeignClient(name = "DOCTORSCHEDULESERVICE", path= "/doctor")
 public interface DoctorClient {
 
-	@GetMapping("/fetch/{id}")
-	public DoctorScheduleDTO getDoctorScheduleById(@PathVariable Long id);
-
-	@GetMapping("/fetchAll")
-	public List<DoctorScheduleDTO> getAllDoctors();
+	@GetMapping("/doctor/fetchBySpecialization/{specialization}")
+	List<DoctorScheduleToAppointmentDTO> getDoctorsBySpecialization(@PathVariable String specialization);
 	
-	@GetMapping("/availableTimeSlots/{doctorId}")
-	public List<LocalDateTime> getAvailableTimeSlots(@PathVariable Long doctorId);
 
+//	@GetMapping("/fetch/{doctorId}")
+//	public DoctorScheduleToAppointmentDTO getDoctorById(@PathVariable Long doctorId);
+	@GetMapping("/fetch/{doctorId}")
+	public DoctorScheduleToAppointmentDTO getDoctorById(@PathVariable Long doctorId);
+
+	@GetMapping("/doctor/fetchAvailableTimeSlots/{doctorId}")
+	public List<LocalDateTime> getDoctorAvailableTimeSlots(@PathVariable Long doctorId);
 }

@@ -28,12 +28,12 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
-	public String updatePatient(Long id, Patient updatedPatient) {
-		logger.info("Updating patient with ID: {}", id);
+	public String updatePatient(Long patientId, Patient updatedPatient) {
+		logger.info("Updating patient with ID: {}", patientId);
 
-		Patient existing = repository.findById(id).orElseThrow(() -> {
-			logger.error("Patient not found with ID: {}", id);
-			return new PatientNotFoundException("Patient with ID " + id + " not found.");
+		Patient existing = repository.findById(patientId).orElseThrow(() -> {
+			logger.error("Patient not found with ID: {}", patientId);
+			return new PatientNotFoundException("Patient with ID " + patientId + " not found.");
 		});
 
 		existing.setName(updatedPatient.getName());
@@ -46,7 +46,7 @@ public class PatientServiceImpl implements PatientService {
 		existing.setContactDetails(updatedPatient.getContactDetails());
 
 		repository.save(existing);
-		logger.info("Patient with ID {} updated successfully.", id);
+		logger.info("Patient with ID {} updated successfully.", patientId);
 		return "Patient updated successfully.";
 	}
 

@@ -3,30 +3,16 @@ package com.hams.doctor.feignclient;
 import java.util.List;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import com.hams.doctor.dto.DoctorScheduleToAppointmentDTO;
+import com.hams.doctor.dto.BookedAppointmentDTO;
 
-@FeignClient(name = "APPOINTMENTSCHEDULINGSERVICE", url = "http://localhost:8002/appointment")
+@FeignClient(name = "APPOINTMENTSCHEDULINGSERVICE", path = "/appointment")
 public interface AppointmentClient {
+	@GetMapping("/booked/doctor/{doctorId}")
+	List<BookedAppointmentDTO> getBookedAppointmentsByDoctorId(@PathVariable("doctorId") Long doctorId);
 
-    @PostMapping("/create")
-    String createAppointment(@RequestBody DoctorScheduleToAppointmentDTO dto);
-
-    @GetMapping("/fetchByDoctorId/{doctorId}")
-    DoctorScheduleToAppointmentDTO getAppointmentByDoctorId(@PathVariable Long doctorId);
-
-    @PutMapping("/update/{doctorId}")
-    String updateAppointment(@PathVariable Long doctorId, @RequestBody DoctorScheduleToAppointmentDTO dto);
-
-    @DeleteMapping("/deleteByDoctorId/{doctorId}")
-    String deleteAppointmentByDoctorId(@PathVariable Long doctorId);
-
-    @GetMapping("/all")
-    List<DoctorScheduleToAppointmentDTO> getAllAppointments();
+	@GetMapping("/fetchByDoctorId/{doctorId}")
+	public List<BookedAppointmentDTO> getAppointmentsByDoctorId(@PathVariable long doctorId);
 }

@@ -37,7 +37,7 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/auth/authenticate", "/auth/getroles/**", "/auth/**").permitAll())
-                .authorizeHttpRequests(requests -> requests.requestMatchers("/employee/**","/department/**")
+                .authorizeHttpRequests(requests -> requests.requestMatchers("/appointment/**","/doctor/**","/medicalHistory/**","/patients/**","/notification/**")
                         .authenticated())
                 .sessionManagement(management -> management
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

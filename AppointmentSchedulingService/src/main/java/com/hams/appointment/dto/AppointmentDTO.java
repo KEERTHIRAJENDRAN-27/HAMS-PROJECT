@@ -3,29 +3,34 @@ package com.hams.appointment.dto;
 import java.time.LocalDateTime;
 
 public class AppointmentDTO {
-	private Long patientId;
+	private Long id;
 	private Long doctorId;
-	private LocalDateTime appointmentDate;
+	private Long patientId;
+	private LocalDateTime appointmentDateTime;
+	private String reason;
 	private String status;
 
 	public AppointmentDTO() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public AppointmentDTO(Long patientId, Long doctorId, LocalDateTime appointmentDate, String status) {
+	public AppointmentDTO(Long id, Long doctorId, Long patientId, LocalDateTime appointmentDateTime, String reason,
+			String status) {
 		super();
-		this.patientId = patientId;
+		this.id = id;
 		this.doctorId = doctorId;
-		this.appointmentDate = appointmentDate;
+		this.patientId = patientId;
+		this.appointmentDateTime = appointmentDateTime;
+		this.reason = reason;
 		this.status = status;
 	}
 
-	public Long getPatientId() {
-		return patientId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setPatientId(Long patientId) {
-		this.patientId = patientId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public Long getDoctorId() {
@@ -36,12 +41,28 @@ public class AppointmentDTO {
 		this.doctorId = doctorId;
 	}
 
-	public LocalDateTime getAppointmentDate() {
-		return appointmentDate;
+	public Long getPatientId() {
+		return patientId;
 	}
 
-	public void setAppointmentDate(LocalDateTime appointmentDate) {
-		this.appointmentDate = appointmentDate;
+	public void setPatientId(Long patientId) {
+		this.patientId = patientId;
+	}
+
+	public LocalDateTime getAppointmentDateTime() {
+		return appointmentDateTime;
+	}
+
+	public void setAppointmentDateTime(LocalDateTime appointmentDateTime) {
+		this.appointmentDateTime = appointmentDateTime;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
 	}
 
 	public String getStatus() {

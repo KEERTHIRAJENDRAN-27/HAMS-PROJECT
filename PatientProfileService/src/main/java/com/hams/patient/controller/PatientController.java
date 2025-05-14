@@ -28,15 +28,15 @@ public class PatientController {
 		return "Patient created";
 	}
 
-	@PutMapping("/update/{id}")
-	public String updatePatient(@PathVariable Long id, @RequestBody Patient patient) {
-		service.updatePatient(id, patient);
+	@PutMapping("/update/{patientId}")
+	public String updatePatient(@PathVariable Long patientId, @RequestBody Patient patient) {
+		service.updatePatient(patientId, patient);
 		return "Patient updated";
 	}
 
-	@GetMapping("/fetchById/{id}")
-	public Patient getPatientById(@PathVariable Long id) {
-		return service.getPatientById(id);
+	@GetMapping("/fetchById/{patientId}")
+	public Patient getPatientById(@PathVariable Long patientId) {
+		return service.getPatientById(patientId);
 	}
 
 	@GetMapping("/fetchAll")
@@ -44,14 +44,14 @@ public class PatientController {
 		return service.getAllPatients();
 	}
 
-	@DeleteMapping("/delete/{id}")
-	public String deletePatient(@PathVariable Long id) {
-		return service.deletePatient(id);
+	@DeleteMapping("/delete/{patientId}")
+	public String deletePatient(@PathVariable Long patientId) {
+		return service.deletePatient(patientId);
 	}
 	
-	@GetMapping("/getEmailById/{id}")
-	public String getEmailById(@PathVariable Long id) {
-	    Patient patient = service.getPatientById(id);
+	@GetMapping("/getEmailById/{patientId}")
+	public String getEmailById(@PathVariable Long patientId) {
+	    Patient patient = service.getPatientById(patientId);
 	    return patient.getEmail();
 	}
 }
