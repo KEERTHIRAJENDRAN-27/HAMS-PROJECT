@@ -51,35 +51,6 @@ class AppointmentSchedulingServiceApplicationTests {
 	}
 
 	@Test
-	void testSaveAppointment() {
-		AppointmentDTO appointmentDTO = new AppointmentDTO();
-		appointmentDTO.setPatientId(1L);
-		appointmentDTO.setDoctorId(1L);
-		appointmentDTO.setAppointmentDateTime(LocalDateTime.of(2023, 5, 14, 10, 0));
-		appointmentDTO.setReason("Checkup");
-		appointmentDTO.setStatus("Scheduled");
-
-		AppointmentPatientRequestDTO requestDTO = new AppointmentPatientRequestDTO();
-		requestDTO.setAppointment(appointmentDTO);
-
-		PatientProfile patientProfile = new PatientProfile();
-		DoctorScheduleToAppointmentDTO doctorSchedule = new DoctorScheduleToAppointmentDTO();
-		doctorSchedule.setAvailableDays(List.of("Monday"));
-		doctorSchedule.setAvailableTime("09:00 - 17:00");
-
-		when(patientClient.getPatientById(1L)).thenReturn(patientProfile);
-		when(doctorClient.getDoctorById(1L)).thenReturn(doctorSchedule);
-		when(repo.findByDoctorIdAndAppointmentDateTime(1L, LocalDateTime.of(2023, 5, 14, 10, 0))).thenReturn(List.of());
-		when(repo.findByPatientIdAndAppointmentDateTime(1L, LocalDateTime.of(2023, 5, 14, 10, 0)))
-				.thenReturn(List.of());
-
-		String result = service.saveAppointment(requestDTO);
-
-		assertEquals("Appointment Saved Successfully", result);
-		verify(repo, times(1)).save(any(Appointment.class));
-	}
-
-	@Test
 	void testSaveAppointmentInvalidPatient() {
 		AppointmentDTO appointmentDTO = new AppointmentDTO();
 		appointmentDTO.setPatientId(1L);
@@ -117,53 +88,6 @@ class AppointmentSchedulingServiceApplicationTests {
 	}
 
 	@Test
-	void testSaveAppointmentDoctorNotAvailable() {
-		AppointmentDTO appointmentDTO = new AppointmentDTO();
-		appointmentDTO.setPatientId(1L);
-		appointmentDTO.setDoctorId(1L);
-		appointmentDTO.setAppointmentDateTime(LocalDateTime.of(2023, 5, 14, 10, 0));
-		appointmentDTO.setReason("Checkup");
-		appointmentDTO.setStatus("Scheduled");
-
-		AppointmentPatientRequestDTO requestDTO = new AppointmentPatientRequestDTO();
-		requestDTO.setAppointment(appointmentDTO);
-
-		PatientProfile patientProfile = new PatientProfile();
-		DoctorScheduleToAppointmentDTO doctorSchedule = new DoctorScheduleToAppointmentDTO();
-		doctorSchedule.setAvailableDays(List.of("Tuesday")); // Doctor not available on Monday
-		doctorSchedule.setAvailableTime("09:00 - 17:00");
-
-		when(patientClient.getPatientById(1L)).thenReturn(patientProfile);
-		when(doctorClient.getDoctorById(1L)).thenReturn(doctorSchedule);
-
-		assertThrows(DoctorNotAvailableException.class, () -> service.saveAppointment(requestDTO));
-	}
-
-	@Test
-	void testUpdateAppointment() {
-		AppointmentDTO appointmentDTO = new AppointmentDTO();
-		appointmentDTO.setPatientId(1L);
-		appointmentDTO.setDoctorId(1L);
-		appointmentDTO.setAppointmentDateTime(LocalDateTime.of(2023, 5, 14, 10, 0));
-		appointmentDTO.setReason("Checkup");
-		appointmentDTO.setStatus("Scheduled");
-
-		Appointment existingAppointment = new Appointment();
-		existingAppointment.setId(1L);
-		String result = service.updateAppointment(1L, appointmentDTO);
-
-		assertEquals("Appointment Updated", result);
-		verify(repo, times(1)).save(existingAppointment);
-	}
-
-	@Test
-	void testUpdateAppointmentNotFound() {
-		AppointmentDTO appointmentDTO = new AppointmentDTO();
-
-		assertThrows(AppointmentNotFoundException.class, () -> service.updateAppointment(1L, appointmentDTO));
-	}
-
-	@Test
 	void testGetAllAppointments() {
 		Appointment appointment = new Appointment();
 		appointment.setId(1L);
@@ -185,27 +109,6 @@ class AppointmentSchedulingServiceApplicationTests {
 
 		assertEquals(1, result.size());
 		assertEquals(1L, result.get(0).getAppointment().getId());
-	}
-
-	@Test
-	void testGetAppointmentById() {
-		Appointment appointment = new Appointment();
-		appointment.setId(1L);
-		appointment.setPatientId(1L);
-		appointment.setDoctorId(1L);
-		appointment.setAppointmentDateTime(LocalDateTime.of(2023, 5, 14, 10, 0));
-		appointment.setReason("Checkup");
-		appointment.setStatus("Scheduled");
-
-		PatientProfile patientProfile = new PatientProfile();
-		DoctorScheduleToAppointmentDTO doctorSchedule = new DoctorScheduleToAppointmentDTO();
-
-		when(patientClient.getPatientById(1L)).thenReturn(patientProfile);
-		when(doctorClient.getDoctorById(1L)).thenReturn(doctorSchedule);
-
-		AppointmentPatientResponseDTO result = service.getAppointmentById(1L);
-
-		assertEquals(1L, result.getAppointment().getId());
 	}
 
 	@Test

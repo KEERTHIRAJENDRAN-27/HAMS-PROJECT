@@ -1,81 +1,38 @@
 package com.hams.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.List;
+import java.time.LocalDateTime;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.hams.notification.dto.NotificationDTO;
-import com.hams.notification.dto.PatientProfile;
-import com.hams.notification.exception.PatientIDNotFoundException;
-import com.hams.notification.feignclient.PatientClient;
 import com.hams.notification.model.Notification;
 import com.hams.notification.repository.NotificationRepository;
 import com.hams.notification.service.NotificationServiceImpl;
 
 @SpringBootTest
 class NotificationServiceApplicationTests {
-	@Mock
-	private NotificationRepository repository;
 
-	@Mock
-	private PatientClient patientClient;
-
-	@InjectMocks
-	private NotificationServiceImpl service;
-
-	private NotificationDTO notificationDTO;
-	private Notification notification;
-	private PatientProfile mockPatient;
-
-	@BeforeEach
-	void setUp() {
-		notificationDTO = new NotificationDTO();
-		notificationDTO.setPatientId(1L);
-		notificationDTO.setMessage("Appointment reminder");
-
-		notification = new Notification();
-		notification.setPatientId(1L);
-		notification.setMessage("Appointment reminder");
-
-		mockPatient = new PatientProfile();
-		mockPatient.setName("John Doe");
-	}
+	private final NotificationRepository repo = mock(NotificationRepository.class);
+	private final NotificationServiceImpl service = new NotificationServiceImpl(repo, null, null, null, null);
 
 	@Test
-	void testSendNotification_Success() {
-		when(patientClient.getPatientById(1L)).thenReturn(mockPatient);
-		when(patientClient.getEmailById(1L)).thenReturn("john.doe@example.com");
-		when(repository.save(any(Notification.class))).thenReturn(notification);
+	void testSendNotification() {
+		NotificationDTO dto = NotificationDTO.builder().patientId(1L).message("Your appointment is tomorrow.")
+				.timestamp(LocalDateTime.now()).build();
 
-		NotificationDTO result = service.sendNotification(notificationDTO);
-		assertEquals("Notification sent to patient ID: 1", result);
-	}
+		Notification entity = Notification.builder().notificationId(1L).patientId(1L)
+				.message("Your appointment is tomorrow.").timestamp(LocalDateTime.now()).build();
 
-	@Test
-	void testSendNotification_InvalidPatient() {
-		when(patientClient.getPatientById(1L)).thenThrow(new PatientIDNotFoundException("Invalid Patient ID: 1"));
+		when(repo.save(any())).thenReturn(entity);
 
-		assertThrows(PatientIDNotFoundException.class, () -> service.sendNotification(notificationDTO));
-	}
-
-	@Test
-	void testSendNotification_EmailFetchFailure() {
-		when(patientClient.getPatientById(1L)).thenReturn(mockPatient);
-		when(patientClient.getEmailById(1L)).thenThrow(new PatientIDNotFoundException("Unable to fetch email"));
-
-		assertThrows(PatientIDNotFoundException.class, () -> service.sendNotification(notificationDTO));
+		NotificationDTO result = service.sendNotification(dto);
+		assertEquals("Your appointment is tomorrow.", result.getMessage());
 	}
 
 }

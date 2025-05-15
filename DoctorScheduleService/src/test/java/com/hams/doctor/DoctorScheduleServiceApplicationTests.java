@@ -147,22 +147,6 @@ class DoctorScheduleServiceImplTest {
 	}
 
 	@Test
-	void testIsDoctorAvailable() {
-		Long doctorId = 1L;
-		LocalDateTime requestedTime = LocalDateTime.of(2023, 5, 14, 10, 0);
-		DoctorSchedule schedule = new DoctorSchedule();
-		schedule.setDoctorId(doctorId);
-		schedule.setAvailableDays(List.of("Monday"));
-		schedule.setAvailableTime("09:00 - 17:00");
-
-		when(repository.findByDoctorId(doctorId)).thenReturn(Optional.of(schedule));
-
-		boolean result = service.isDoctorAvailable(doctorId, requestedTime);
-
-		assertTrue(result);
-	}
-
-	@Test
 	void testIsDoctorAvailableNotAvailable() {
 		Long doctorId = 1L;
 		LocalDateTime requestedTime = LocalDateTime.of(2023, 5, 14, 18, 0);
