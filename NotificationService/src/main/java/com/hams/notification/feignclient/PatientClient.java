@@ -11,5 +11,5 @@ public interface PatientClient {
 	@GetMapping("/fetchById/{id}")
 	public PatientProfile getPatientById(@PathVariable Long id);
 	@GetMapping("/getEmailById/{id}")
-	public String getEmailById(@PathVariable Long id);
+	String getEmailById(@PathVariable Long id);	
 }

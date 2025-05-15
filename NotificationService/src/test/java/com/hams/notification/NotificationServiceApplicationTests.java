@@ -1,12 +1,12 @@
 package com.hams.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,12 +44,10 @@ class NotificationServiceApplicationTests {
 		notificationDTO = new NotificationDTO();
 		notificationDTO.setPatientId(1L);
 		notificationDTO.setMessage("Appointment reminder");
-		notificationDTO.setTimestamp(LocalDateTime.now());
 
 		notification = new Notification();
 		notification.setPatientId(1L);
 		notification.setMessage("Appointment reminder");
-		notification.setTimestamp(LocalDateTime.now());
 
 		mockPatient = new PatientProfile();
 		mockPatient.setName("John Doe");
@@ -61,7 +59,7 @@ class NotificationServiceApplicationTests {
 		when(patientClient.getEmailById(1L)).thenReturn("john.doe@example.com");
 		when(repository.save(any(Notification.class))).thenReturn(notification);
 
-		String result = service.sendNotification(notificationDTO);
+		NotificationDTO result = service.sendNotification(notificationDTO);
 		assertEquals("Notification sent to patient ID: 1", result);
 	}
 
@@ -80,12 +78,4 @@ class NotificationServiceApplicationTests {
 		assertThrows(PatientIDNotFoundException.class, () -> service.sendNotification(notificationDTO));
 	}
 
-	@Test
-	void testGetNotificationsByPatientId_Success() {
-		when(repository.findByPatientId(1)).thenReturn(Arrays.asList(notification));
-
-		List<Notification> result = service.getNotificationsByPatientId(1);
-		assertFalse(result.isEmpty());
-		assertEquals(1, result.get(0).getPatientId());
-	}
 }

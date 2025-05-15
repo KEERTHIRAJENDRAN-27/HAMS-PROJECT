@@ -24,41 +24,41 @@ import jakarta.validation.Valid;
 @RequestMapping("/appointment")
 public class AppointmentController {
 
-    @Autowired
-    private AppointmentService service;
+	@Autowired
+	private AppointmentService service;
 
-    @PostMapping("/save")
-    public String saveAppointment(@Valid @RequestBody AppointmentPatientRequestDTO requestDTO) {
-        return service.saveAppointment(requestDTO);
-    }
+	@PostMapping("/save")
+	public String saveAppointment(@Valid @RequestBody AppointmentPatientRequestDTO requestDTO) {
+		return service.saveAppointment(requestDTO);
+	}
 
-    @PutMapping("/update/{id}")
-    public String updateAppointment(@PathVariable int id, @RequestBody AppointmentDTO dto) {
-        return service.updateAppointment(id, dto);
-    }
+	@PutMapping("/update/{id}")
+	public String updateAppointment(@PathVariable int id, @RequestBody AppointmentDTO dto) {
+		return service.updateAppointment(id, dto);
+	}
 
-    @GetMapping("/fetchAll")
-    public List<AppointmentPatientResponseDTO> getAllAppointments() {
-        return service.getAllAppointments();
-    }
+	@GetMapping("/fetchAll")
+	public List<AppointmentPatientResponseDTO> getAllAppointments() {
+		return service.getAllAppointments();
+	}
 
-    @GetMapping("/fetchById/{id}")
-    public AppointmentPatientResponseDTO getAppointmentById(@PathVariable int id) {
-        return service.getAppointmentById(id);
-    }
-    
-    @GetMapping("/fetchByDoctorId/{doctorId}")
-    public List<AppointmentPatientResponseDTO> getAppointmentsByDoctorId(@PathVariable long doctorId) {
-    return service.getAppointmentsByDoctorId(doctorId);
-    }
+	@GetMapping("/fetchById/{id}")
+	public AppointmentPatientResponseDTO getAppointmentById(@PathVariable int id) {
+		return service.getAppointmentById(id);
+	}
 
-    @DeleteMapping("/delete/{id}")
-    public String deleteAppointment(@PathVariable int id) {
-        return service.deleteAppointment(id);
-    }
+	@GetMapping("/fetchByDoctorId/{doctorId}")
+	public List<AppointmentPatientResponseDTO> getAppointmentsByDoctorId(@PathVariable long doctorId) {
+		return service.getAppointmentsByDoctorId(doctorId);
+	}
 
-    @GetMapping("/doctors/fetchBySpecialization/{specialization}")
-    public List<DoctorScheduleToAppointmentDTO> getDoctorsBySpecialization(@PathVariable String specialization) {
-        return service.getDoctorsBySpecialization(specialization);
-    }
+	@DeleteMapping("/delete/{id}")
+	public String deleteAppointment(@PathVariable int id) {
+		return service.deleteAppointment(id);
+	}
+
+	@GetMapping("/doctors/fetchBySpecialization/{specialization}")
+	public List<DoctorScheduleToAppointmentDTO> getDoctorsBySpecialization(@PathVariable String specialization) {
+		return service.getDoctorsBySpecialization(specialization);
+	}
 }

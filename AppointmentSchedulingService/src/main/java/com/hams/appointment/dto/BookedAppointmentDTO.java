@@ -10,7 +10,7 @@ public class BookedAppointmentDTO {
 	private LocalDateTime appointmentDate;
 
 	public BookedAppointmentDTO() {
-// Default constructor
+		// Default constructor
 	}
 
 	public BookedAppointmentDTO(Long appointmentId, Long patientId, String patientName, LocalDateTime appointmentDate) {

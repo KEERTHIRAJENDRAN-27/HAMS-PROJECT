@@ -1,8 +1,8 @@
-package com.hams.appointment.dto;
+package com.hams.notification.dto;
 
 import java.util.List;
 
-public class DoctorScheduleToAppointmentDTO {
+public class DoctorResponseDTO {
 	private Long doctorId;
 	private String doctorName;
 	private String specialization;
@@ -10,13 +10,11 @@ public class DoctorScheduleToAppointmentDTO {
 	private String availableTime;
 	private List<String> bookedAppointments; // should be ISO date-time strings
 
-	public DoctorScheduleToAppointmentDTO() {
-		// TODO Auto-generated constructor stub
+	public DoctorResponseDTO() {
 	}
 
-	public DoctorScheduleToAppointmentDTO(Long doctorId, String doctorName, String specialization,
-			List<String> availableDays, String availableTime, List<String> bookedAppointments) {
-		super();
+	public DoctorResponseDTO(Long doctorId, String doctorName, String specialization, List<String> availableDays,
+			String availableTime, List<String> bookedAppointments) {
 		this.doctorId = doctorId;
 		this.doctorName = doctorName;
 		this.specialization = specialization;
@@ -24,6 +22,8 @@ public class DoctorScheduleToAppointmentDTO {
 		this.availableTime = availableTime;
 		this.bookedAppointments = bookedAppointments;
 	}
+
+	// Getters and setters
 
 	public Long getDoctorId() {
 		return doctorId;
@@ -72,5 +72,4 @@ public class DoctorScheduleToAppointmentDTO {
 	public void setBookedAppointments(List<String> bookedAppointments) {
 		this.bookedAppointments = bookedAppointments;
 	}
-
 }

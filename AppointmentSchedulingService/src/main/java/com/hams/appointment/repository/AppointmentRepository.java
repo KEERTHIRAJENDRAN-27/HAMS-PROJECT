@@ -1,5 +1,6 @@
 package com.hams.appointment.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,4 +17,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 	boolean existsById(long id);
 
 	List<Appointment> findByDoctorId(long doctorId);
+
+	List<Appointment> findByPatientIdAndAppointmentDateTime(Long patientId, LocalDateTime appointmentDateTime);
+
+	List<Appointment> findByDoctorIdAndAppointmentDateTime(Long doctorId, LocalDateTime appointmentDateTime);
+
 }

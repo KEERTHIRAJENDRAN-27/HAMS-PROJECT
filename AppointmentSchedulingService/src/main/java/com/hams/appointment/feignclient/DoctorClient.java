@@ -9,15 +9,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.hams.appointment.dto.DoctorScheduleToAppointmentDTO;
 
-@FeignClient(name = "DOCTORSCHEDULESERVICE", path= "/doctor")
+@FeignClient(name = "DOCTORSCHEDULESERVICE", path = "/doctor")
 public interface DoctorClient {
 
 	@GetMapping("/doctor/fetchBySpecialization/{specialization}")
 	List<DoctorScheduleToAppointmentDTO> getDoctorsBySpecialization(@PathVariable String specialization);
-	
 
-//	@GetMapping("/fetch/{doctorId}")
-//	public DoctorScheduleToAppointmentDTO getDoctorById(@PathVariable Long doctorId);
 	@GetMapping("/fetch/{doctorId}")
 	public DoctorScheduleToAppointmentDTO getDoctorById(@PathVariable Long doctorId);
 

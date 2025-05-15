@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.hams.medical.dto.Patient;
 
 @FeignClient(value = "PATIENTPROFILESERVICE", url = "http://localhost:8001/patients")
+//@FeignClient(name = "PATIENTPROFILESERVICE", path = "/patients")
 public interface PatientClient {
 	@GetMapping("/fetchById/{id}")
 	public Patient getPatientById(@PathVariable Long id);

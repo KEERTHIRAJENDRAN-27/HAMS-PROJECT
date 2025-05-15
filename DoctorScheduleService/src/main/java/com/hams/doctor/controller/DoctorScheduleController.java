@@ -52,7 +52,7 @@ public class DoctorScheduleController {
 	public String delete(@PathVariable Long doctorId) {
 		return service.deleteById(doctorId);
 	}
-
+	
 	@GetMapping("/isAvailable/{doctorId}/{dateTime}")
 	public boolean isDoctorAvailable(@PathVariable Long doctorId, @PathVariable String dateTime) {
 		LocalDateTime requested = LocalDateTime.parse(dateTime);

@@ -1,33 +1,20 @@
 package com.hams.notification.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotificationDTO {
-	private Long patientId;
-	private String message;
-	private LocalDateTime timestamp;
-
-	public Long getPatientId() {
-		return patientId;
-	}
-
-	public void setPatientId(Long patientId) {
-		this.patientId = patientId;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public LocalDateTime getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(LocalDateTime timestamp) {
-		this.timestamp = timestamp;
-	}
+    private Long notificationId;
+    private Long patientId;
+    private String patientEmail;
+    private String message;
+    private LocalDateTime timestamp;
 }

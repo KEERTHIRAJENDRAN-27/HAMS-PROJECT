@@ -30,11 +30,11 @@ public class Appointment {
 	private String status; // For example: 'booked', 'completed', 'canceled'
 
 	private String reason;
-	
+
 	public Appointment() {
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	public Appointment(Long id, @NotNull Long doctorId, @NotNull Long patientId,
 			@NotNull LocalDateTime appointmentDateTime, @NotNull @Size(max = 255) String status, String reason) {
 		super();
@@ -94,5 +94,4 @@ public class Appointment {
 		this.reason = reason;
 	}
 
-	
 }
