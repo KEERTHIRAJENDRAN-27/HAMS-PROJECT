@@ -92,4 +92,14 @@ public class Patient {
 		this.contactDetails = contactDetails;
 	}
 
+	public void setId(long l) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public Long getId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

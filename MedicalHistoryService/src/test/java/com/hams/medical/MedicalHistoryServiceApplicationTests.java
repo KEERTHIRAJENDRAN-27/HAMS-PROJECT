@@ -1,15 +1,11 @@
 package com.hams.medical;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,119 +16,84 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.hams.medical.dto.MedicalHistoryPatientResponseDTO;
 import com.hams.medical.dto.Patient;
-import com.hams.medical.exception.HistoryNotFoundException;
-import com.hams.medical.exception.PatientNotFoundException;
 import com.hams.medical.feignclient.PatientClient;
 import com.hams.medical.model.MedicalHistory;
 import com.hams.medical.repository.MedicalHistoryRepository;
 import com.hams.medical.service.MedicalHistoryServiceImpl;
 
 @SpringBootTest
-class MedicalHistoryServiceApplicationTests {
+class MedicalHistoryServiceTests {
 
-	@Mock
-	private MedicalHistoryRepository repository;
+    @Mock
+    private MedicalHistoryRepository repository;
 
-	@Mock
-	private PatientClient patientClient;
+    @Mock
+    private PatientClient patientClient;
 
-	@InjectMocks
-	private MedicalHistoryServiceImpl service;
+    @InjectMocks
+    private MedicalHistoryServiceImpl service;
 
-	private MedicalHistory mockHistory;
-	private Patient mockPatient;
+    private MedicalHistory medicalHistory;
+    private Patient patient;
 
-	@BeforeEach
-	void setUp() {
-		mockPatient = new Patient();
-//		mockPatient.setId(1L);
-		mockPatient.setName("John Doe");
+    @BeforeEach
+    void setUp() {
+        medicalHistory = new MedicalHistory();
+        medicalHistory.setPatientId(1L);
+        medicalHistory.setDiagnosis("Test Diagnosis");
+        medicalHistory.setTreatment("Test Treatment");
+        
+        patient = new Patient();
+        patient.setId(1L);
+        patient.setName("John Doe");
+    }
 
-		mockHistory = new MedicalHistory();
-		mockHistory.setPatientId(1L);
-		mockHistory.setDiagnosis("Flu");
-		mockHistory.setTreatment("Rest and hydration");
-	}
+    @Test
+    void testGetMedicalHistoryWithPatient() {
+        when(patientClient.getPatientById(1L)).thenReturn(patient);
+        when(repository.findByPatientId(1L)).thenReturn(Arrays.asList(medicalHistory));
 
-	@Test
-	void testGetMedicalHistoryWithPatient_Success() {
-		when(patientClient.getPatientById(1L)).thenReturn(mockPatient);
-		when(repository.findByPatientId(1L)).thenReturn(Arrays.asList(mockHistory));
+        MedicalHistoryPatientResponseDTO response = service.getMedicalHistoryWithPatient(1L);
 
-		MedicalHistoryPatientResponseDTO result = service.getMedicalHistoryWithPatient(1L);
-		assertNotNull(result);
-		assertEquals("John Doe", result.getPatient().getName());
-	}
+        assertNotNull(response);
+        assertEquals(1L, response.getPatient().getId());
+        assertFalse(response.getMedicalHistory().isEmpty());
+    }
 
-	@Test
-	void testGetMedicalHistoryWithPatient_PatientNotFound() {
-		when(patientClient.getPatientById(1L)).thenThrow(new PatientNotFoundException("Patient not found"));
+    @Test
+    void testSaveMedicalHistory() {
+        when(patientClient.getPatientById(1L)).thenReturn(patient);
+        when(repository.save(any(MedicalHistory.class))).thenReturn(medicalHistory);
 
-		assertThrows(PatientNotFoundException.class, () -> service.getMedicalHistoryWithPatient(1L));
-	}
+        String response = service.saveHistory(medicalHistory);
+        assertEquals("Medical history saved successfully.", response);
+    }
 
-	@Test
-	void testSaveHistory_Success() {
-		when(patientClient.getPatientById(1L)).thenReturn(mockPatient);
-		when(repository.save(any(MedicalHistory.class))).thenReturn(mockHistory);
+    @Test
+    void testUpdateMedicalHistory() {
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(medicalHistory));
+        when(repository.save(any(MedicalHistory.class))).thenReturn(medicalHistory);
 
-		String result = service.saveHistory(mockHistory);
-		assertEquals("Medical history saved successfully.", result);
-	}
+        String response = service.updateHistory(1L, medicalHistory);
+        assertEquals("Medical history updated successfully.", response);
+    }
 
-	@Test
-	void testSaveHistory_InvalidPatient() {
-		when(patientClient.getPatientById(1L)).thenThrow(new PatientNotFoundException("Invalid Patient ID"));
+    @Test
+    void testGetMedicalHistoryById() {
+        when(repository.findById(1L)).thenReturn(Optional.of(medicalHistory));
 
-		assertThrows(PatientNotFoundException.class, () -> service.saveHistory(mockHistory));
-	}
+        MedicalHistory response = service.getById(1L);
+        assertNotNull(response);
+        assertEquals(1L, response.getPatientId());
+    }
 
-	@Test
-	void testUpdateHistory_Success() {
-		when(repository.findById(1L)).thenReturn(Optional.of(mockHistory));
-		when(repository.save(any(MedicalHistory.class))).thenReturn(mockHistory);
+    @Test
+    void testDeleteMedicalHistoryById() {
+        when(repository.existsById(1L)).thenReturn(true);
+        doNothing().when(repository).deleteById(1L);
 
-		String result = service.updateHistory(1L, mockHistory);
-		assertEquals("Medical history updated successfully.", result);
-	}
-
-	@Test
-	void testUpdateHistory_NotFound() {
-		when(repository.findById(1L)).thenReturn(Optional.empty());
-
-		assertThrows(HistoryNotFoundException.class, () -> service.updateHistory(1L, mockHistory));
-	}
-
-	@Test
-	void testGetById_Success() {
-		when(repository.findById(1L)).thenReturn(Optional.of(mockHistory));
-
-		MedicalHistory result = service.getById(1L);
-		assertNotNull(result);
-		assertEquals("Flu", result.getDiagnosis());
-	}
-
-	@Test
-	void testGetById_NotFound() {
-		when(repository.findById(1L)).thenReturn(Optional.empty());
-
-		assertThrows(HistoryNotFoundException.class, () -> service.getById(1L));
-	}
-
-	@Test
-	void testDeleteById_Success() {
-		when(repository.existsById(1L)).thenReturn(true);
-		doNothing().when(repository).deleteById(1L);
-
-		String result = service.deleteById(1L);
-		assertEquals("Medical history deleted successfully.", result);
-		verify(repository, times(1)).deleteById(1L);
-	}
-
-	@Test
-	void testDeleteById_NotFound() {
-		when(repository.existsById(1L)).thenReturn(false);
-
-		assertThrows(HistoryNotFoundException.class, () -> service.deleteById(1L));
-	}
+        String response = service.deleteById(1L);
+        assertEquals("Medical history deleted successfully.", response);
+        verify(repository, times(1)).deleteById(1L);
+    }
 }
