@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.hams.doctor.dto.BookedAppointmentDTO;
-//@FeignClient(value = "APPOINTMENTSCHEDULINGSERVICE", url = "http://localhost:8002/appointment")
+
 @FeignClient(name = "APPOINTMENTSCHEDULINGSERVICE", path = "/appointment")
 public interface AppointmentClient {
 	@GetMapping("/booked/doctor/{doctorId}")

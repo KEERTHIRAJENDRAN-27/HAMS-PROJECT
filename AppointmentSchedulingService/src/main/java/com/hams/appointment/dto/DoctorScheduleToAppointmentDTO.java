@@ -1,36 +1,49 @@
 package com.hams.appointment.dto;
 
-import java.util.List;
-
 public class DoctorScheduleToAppointmentDTO {
-	private Long doctorId;
+
 	private String doctorName;
+
 	private String specialization;
-	private List<String> availableDays;
+	private String gender;
+	private String availableDays;
+
 	private String availableTime;
-	private List<String> bookedAppointments; // should be ISO date-time strings
+	private String email;
+	private String contact;
+	private int experience;
+
+	public String getAvailableDays() {
+		return availableDays;
+	}
+
+	public String getAvailableTime() {
+		return availableTime;
+	}
+
+	public DoctorScheduleToAppointmentDTO(String doctorName, String specialization, String gender, String availableDays,
+			String availableTime, String email, String contact, int experience) {
+		super();
+		this.doctorName = doctorName;
+		this.specialization = specialization;
+		this.gender = gender;
+		this.availableDays = availableDays;
+		this.availableTime = availableTime;
+		this.email = email;
+		this.contact = contact;
+		this.experience = experience;
+	}
 
 	public DoctorScheduleToAppointmentDTO() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public DoctorScheduleToAppointmentDTO(Long doctorId, String doctorName, String specialization,
-			List<String> availableDays, String availableTime, List<String> bookedAppointments) {
-		super();
-		this.doctorId = doctorId;
-		this.doctorName = doctorName;
-		this.specialization = specialization;
+	public void setAvailableDays(String availableDays) {
 		this.availableDays = availableDays;
+	}
+
+	public void setAvailableTime(String availableTime) {
 		this.availableTime = availableTime;
-		this.bookedAppointments = bookedAppointments;
-	}
-
-	public Long getDoctorId() {
-		return doctorId;
-	}
-
-	public void setDoctorId(Long doctorId) {
-		this.doctorId = doctorId;
 	}
 
 	public String getDoctorName() {
@@ -49,28 +62,36 @@ public class DoctorScheduleToAppointmentDTO {
 		this.specialization = specialization;
 	}
 
-	public List<String> getAvailableDays() {
-		return availableDays;
+	public String getGender() {
+		return gender;
 	}
 
-	public void setAvailableDays(List<String> availableDays) {
-		this.availableDays = availableDays;
+	public void setGender(String gender) {
+		this.gender = gender;
 	}
 
-	public String getAvailableTime() {
-		return availableTime;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setAvailableTime(String availableTime) {
-		this.availableTime = availableTime;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
-	public List<String> getBookedAppointments() {
-		return bookedAppointments;
+	public String getContact() {
+		return contact;
 	}
 
-	public void setBookedAppointments(List<String> bookedAppointments) {
-		this.bookedAppointments = bookedAppointments;
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
+
+	public int getExperience() {
+		return experience;
+	}
+
+	public void setExperience(int experience) {
+		this.experience = experience;
 	}
 
 }

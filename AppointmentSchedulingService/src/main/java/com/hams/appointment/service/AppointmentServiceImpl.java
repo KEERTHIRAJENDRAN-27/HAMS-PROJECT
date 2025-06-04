@@ -2,8 +2,10 @@ package com.hams.appointment.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,22 +59,24 @@ public class AppointmentServiceImpl implements AppointmentService {
 		DoctorScheduleToAppointmentDTO doctor;
 		try {
 			doctor = doctorClient.getDoctorById(dto.getDoctorId());
+			System.out.println(doctor);
 		} catch (Exception e) {
-			throw new InvalidDoctorException("Invalid Doctor ID: " + dto.getDoctorId());
+			throw new InvalidDoctorException("Invalid Doctor ID: " + dto.getDoctorId() + " exception" + e);
 		}
-
+		
+//		 3. Check if doctor is available on this day and time
+	
 		LocalDateTime appointmentDateTime = dto.getAppointmentDateTime();
 		DayOfWeek appointmentDay = appointmentDateTime.getDayOfWeek();
-		String dayName = appointmentDay.name().charAt(0) + appointmentDay.name().substring(1).toLowerCase();
-		String timeString = appointmentDateTime.toLocalTime().toString().substring(0, 5);
+		String dayName = appointmentDay.getDisplayName(TextStyle.FULL, Locale.ENGLISH); // e.g., "Tuesday"
+		String timeString = appointmentDateTime.toLocalTime().toString().substring(0, 5); // e.g., "10:00"
 
-//		 3. Check if doctor is available on this day and time
-//		boolean isDayAvailable = doctor.getAvailableDays().contains(dayName);
-//		boolean isTimeAvailable = doctor.getAvailableTime().contains(timeString);
-//
-//		if (!isDayAvailable || !isTimeAvailable) {
-//			throw new DoctorNotAvailableException("Doctor is not available on " + dayName + " at " + timeString);
-//		}
+		boolean isDayAvailable = doctor.getAvailableDays().contains(dayName);
+		boolean isTimeAvailable = doctor.getAvailableTime().contains(timeString);
+
+		if (!isDayAvailable || !isTimeAvailable) {
+			throw new DoctorNotAvailableException("Doctor is not available on " + dayName + " at " + timeString);
+		}
 
 		// 4. Prevent double booking by checking existing appointments
 		List<Appointment> existingAppointments = repo.findByDoctorIdAndAppointmentDateTime(dto.getDoctorId(),
@@ -101,11 +105,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 		NotificationDTO notification = new NotificationDTO();
 		notification.setPatientId(patient.getPatientId());
 		notification.setPatientEmail(patient.getEmail());
-		notification.setMessage("Dear " + patient.getName() + ", your appointment with Doctor ID "
-		        + dto.getDoctorId() + " is confirmed for " + dto.getAppointmentDateTime().toString());
-		 
+		notification.setMessage("Dear " + patient.getName() + ", your appointment with Doctor ID " + dto.getDoctorId()
+				+ " is confirmed for " + dto.getAppointmentDateTime().toString());
+
 		notificationClient.sendNotification(notification);
-		
+
 		return "Appointment Saved Successfully";
 	}
 
@@ -224,6 +228,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Override
 	public List<DoctorScheduleToAppointmentDTO> getDoctorsBySpecialization(String specialization) {
 		// Retrieve doctors by specialization using DoctorClient
-		return doctorClient.getDoctorsBySpecialization(specialization);
+		return doctorClient.getSchedulesBySpecialization(specialization);
 	}
 }

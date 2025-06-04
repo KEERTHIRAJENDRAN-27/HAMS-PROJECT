@@ -3,6 +3,7 @@ package com.hams.patient.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/patients")
+@CrossOrigin("*")
 public class PatientController {
 
 	@Autowired
@@ -31,7 +33,7 @@ public class PatientController {
 	}
 
 	@PutMapping("/update/{patientId}")
-	public String updatePatient(@PathVariable Long patientId, @RequestBody Patient patient) {
+	public String updatePatient(@Valid @PathVariable Long patientId, @RequestBody Patient patient) {
 		service.updatePatient(patientId, patient);
 		return "Patient updated successfully.";
 	}

@@ -21,7 +21,7 @@ import com.service.UserService;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin("*")
+//@CrossOrigin("*")
 public class AuthController {
 
     @Autowired
@@ -52,7 +52,7 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         if (authentication.isAuthenticated()) {
         	UserInfo obj = repo.findByName(authRequest.getUsername()).orElse(null);
-            return jwtService.generateToken(authRequest.getUsername(),obj.getRoles());
+            return jwtService.generateToken(authRequest.getUsername(),obj.getRoles(),obj.getId());
         } else {
             throw new UsernameNotFoundException("invalid user request !");
         }

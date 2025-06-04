@@ -34,14 +34,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 	MedicalHistoryServiceImpl(CustomGlobalExceptionHandler customGlobalExceptionHandler) {
 	}
 
-	/**
-	 * Fetch medical history along with patient details.
-	 * 
-	 * @param patientId - ID of the patient
-	 * @return MedicalHistoryPatientResponseDTO containing patient and medical
-	 *         history data
-	 * @throws PatientNotFoundException if the patient is not found
-	 */
+	// Fetch medical history along with patient details.
 	public MedicalHistoryPatientResponseDTO getMedicalHistoryWithPatient(Long patientId)
 			throws PatientNotFoundException {
 		logger.info("Fetching medical history for patient ID: {}", patientId);
@@ -59,13 +52,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 		}
 	}
 
-	/**
-	 * Saves medical history for a patient.
-	 * 
-	 * @param dto - Medical history details
-	 * @return Confirmation message
-	 * @throws PatientNotFoundException if the patient ID is invalid
-	 */
+	// * Saves medical history for a patient.
 	@Override
 	public String saveHistory(MedicalHistory dto) throws PatientNotFoundException {
 		logger.info("Saving medical history for patient ID: {}", dto.getPatientId());
@@ -90,14 +77,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 		return "Medical history saved successfully.";
 	}
 
-	/**
-	 * Updates an existing medical history record.
-	 * 
-	 * @param id      - Medical history ID
-	 * @param updated - Updated medical history data
-	 * @return Confirmation message
-	 * @throws HistoryNotFoundException if the record does not exist
-	 */
+	// Updates an existing medical history record.
 	@Override
 	public String updateHistory(Long id, MedicalHistory updated) throws HistoryNotFoundException {
 		logger.info("Updating medical history for ID: {}", id);
@@ -118,13 +98,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 		return "Medical history updated successfully.";
 	}
 
-	/**
-	 * Fetch a medical history record by ID.
-	 * 
-	 * @param id - Medical history ID
-	 * @return Medical history record
-	 * @throws HistoryNotFoundException if the record does not exist
-	 */
+	// Fetch a medical history record by ID.
 	@Override
 	public MedicalHistory getById(Long id) throws HistoryNotFoundException {
 		logger.info("Fetching medical history for ID: {}", id);
@@ -135,13 +109,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 		});
 	}
 
-	/**
-	 * Fetch all medical history records for a specific patient.
-	 * 
-	 * @param patientId - Patient ID
-	 * @return List of medical history records
-	 * @throws HistoryNotFoundException if no records are found
-	 */
+	// Fetch all medical history records for a specific patient.
 	@Override
 	public List<MedicalHistory> getByPatientId(Long patientId) throws HistoryNotFoundException {
 		logger.info("Fetching medical history for patient ID: {}", patientId);
@@ -155,24 +123,14 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
 		return list;
 	}
 
-	/**
-	 * Fetch all medical history records in the system.
-	 * 
-	 * @return List of all medical history records
-	 */
+	// Fetch all medical history records in the system.
 	@Override
 	public List<MedicalHistory> getAll() {
 		logger.info("Fetching all medical history records.");
 		return repository.findAll();
 	}
 
-	/**
-	 * Deletes a medical history record by ID.
-	 * 
-	 * @param id - Medical history ID
-	 * @return Confirmation message
-	 * @throws HistoryNotFoundException if the record does not exist
-	 */
+	// Deletes a medical history record by ID.
 	@Override
 	public String deleteById(Long id) throws HistoryNotFoundException {
 		logger.info("Attempting to delete medical history for ID: {}", id);

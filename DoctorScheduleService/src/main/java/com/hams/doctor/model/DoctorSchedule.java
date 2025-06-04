@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
@@ -36,8 +37,11 @@ public class DoctorSchedule {
 	@Column(name = "available_day")
 	private List<String> availableDays;
 
-	@Pattern(regexp = "^([01]\\d|2[0-3]):[0-5]\\d - ([01]\\d|2[0-3]):[0-5]\\d$", message = "Available time must be in 24-hour format HH:mm - HH:mm")
-	private String availableTime;
+//	@Pattern(regexp = "^([01]\\d|2[0-3]):[0-5]\\d - ([01]\\d|2[0-3]):[0-5]\\d$", message = "Available time must be in 24-hour format HH:mm - HH:mm")
+//	private String availableTime;
+	
+	@NotBlank(message = "Available time slots cannot be blank")
+	private String availableTime; // e.g., "09:30,13:40"
 
 	@ElementCollection
 	@CollectionTable(name = "doctor_booked_appointments", joinColumns = @JoinColumn(name = "doctor_schedule_id"))
