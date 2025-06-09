@@ -22,4 +22,6 @@ public interface AppointmentService {
 	String deleteAppointment(long id);
 
 	List<DoctorScheduleToAppointmentDTO> getDoctorsBySpecialization(String specialization);
+
+	List<AppointmentPatientResponseDTO> getAppointmentsByPatientId(int patientId);
 }

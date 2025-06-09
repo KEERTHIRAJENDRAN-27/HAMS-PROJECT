@@ -15,7 +15,7 @@ import jakarta.validation.constraints.Pattern;
 public class DoctorSchedule {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	//@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long doctorId;
 
 	@NotBlank(message = "Doctor Name cannot be blank")

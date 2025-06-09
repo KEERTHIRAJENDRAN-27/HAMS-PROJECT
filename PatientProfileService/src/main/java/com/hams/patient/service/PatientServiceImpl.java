@@ -36,6 +36,7 @@ public class PatientServiceImpl implements PatientService {
 			return new PatientNotFoundException("Patient with ID " + patientId + " not found.");
 		});
 
+		existing.setPatientId(updatedPatient.getPatientId());
 		existing.setName(updatedPatient.getName());
 		existing.setAge(updatedPatient.getAge());
 		existing.setBloodGroup(updatedPatient.getBloodGroup());

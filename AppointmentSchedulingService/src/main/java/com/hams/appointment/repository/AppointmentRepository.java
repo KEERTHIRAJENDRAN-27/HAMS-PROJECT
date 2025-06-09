@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.hams.appointment.dto.AppointmentDTO;
+import com.hams.appointment.dto.AppointmentPatientResponseDTO;
 import com.hams.appointment.model.Appointment;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
@@ -22,4 +24,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 
 	List<Appointment> findByDoctorIdAndAppointmentDateTime(Long doctorId, LocalDateTime appointmentDateTime);
 
+	List<Appointment> findByPatientId(int patientId);
+	 
 }

@@ -3,6 +3,7 @@ package com.hams.appointment.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/appointment")
+//@CrossOrigin("*")
 public class AppointmentController {
 
 	@Autowired
@@ -29,6 +31,7 @@ public class AppointmentController {
 
 	@PostMapping("/save")
 	public String saveAppointment(@Valid @RequestBody AppointmentPatientRequestDTO requestDTO) {
+		System.out.println("Doctor Id :"+requestDTO.getAppointment().getDoctorId());
 		return service.saveAppointment(requestDTO);
 	}
 
@@ -60,5 +63,10 @@ public class AppointmentController {
 	@GetMapping("/doctors/fetchBySpecialization/{specialization}")
 	public List<DoctorScheduleToAppointmentDTO> getDoctorsBySpecialization(@PathVariable String specialization) {
 		return service.getDoctorsBySpecialization(specialization);
+	}
+	
+	@GetMapping("/fetchByPatientId/{patientId}")
+	public List<AppointmentPatientResponseDTO> getAppointmentsByPatientId(@PathVariable int patientId) {
+	    return service.getAppointmentsByPatientId(patientId);
 	}
 }

@@ -61,14 +61,12 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 	private boolean isAuthorized(String role, String path, String method) {
 		if ("ADMIN".equalsIgnoreCase(role)) {
 			return path.startsWith("/patients") || path.startsWith("/doctor") || path.startsWith("/appointment")
-					|| path.startsWith("/medicalHistory") || path.startsWith("/notification");
+					|| path.startsWith("/medicalHistory");
 		} else if ("PATIENT".equalsIgnoreCase(role)) {
-			return (path.startsWith("/patients") || path.startsWith("/appointment")
-					|| path.startsWith("/medicalHistory")) && method.equalsIgnoreCase("GET");
+			return (path.startsWith("/patients") || path.startsWith("/appointment") || path.startsWith("/medicalHistory")&& method.equalsIgnoreCase("GET")|| path.startsWith("/doctor") && method.equalsIgnoreCase("GET"));
 		} else if ("DOCTOR".equalsIgnoreCase(role)) {
-			return (path.startsWith("/doctor") || path.startsWith("/medicalHistory")
-					|| path.startsWith("/appointment") && method.equalsIgnoreCase("GET")
-					|| path.startsWith("/patients") && method.equalsIgnoreCase("GET"));
+			return (path.startsWith("/doctor") || path.startsWith("/medicalHistory") || path.startsWith("/patients") && method.equalsIgnoreCase("GET")
+					|| path.startsWith("/appointment"));
 		}
 
 		return false;

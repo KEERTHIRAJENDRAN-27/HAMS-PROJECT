@@ -1,5 +1,8 @@
 package com.hams.appointment.feignclient;
 
+import java.util.List;
+
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,5 +14,8 @@ public interface PatientClient {
 
 	@GetMapping("/fetchById/{patientId}")
 	public PatientProfile getPatientById(@PathVariable Long patientId);
+	
+	@GetMapping("/fetchAll")
+	public List<PatientProfile> getAllPatients();
 
 }

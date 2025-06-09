@@ -25,7 +25,7 @@ import com.hams.doc.service.DoctorScheduleService;
 
 @RestController
 @RequestMapping("/doctor")
-@CrossOrigin("*")
+//@CrossOrigin("*")
 public class DoctorScheduleController {
 
 	@Autowired

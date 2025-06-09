@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 
 public class DoctorScheduleDTO {
-
+	private Long doctorId;
 	@NotBlank(message = "Doctor name cannot be blank")
 	private String doctorName;
 
@@ -41,7 +41,7 @@ public class DoctorScheduleDTO {
 		// TODO Auto-generated constructor stub
 	}
 
-	public DoctorScheduleDTO(@NotBlank(message = "Doctor name cannot be blank") String doctorName,
+	public DoctorScheduleDTO(Long doctorId, @NotBlank(message = "Doctor name cannot be blank") String doctorName,
 			@NotBlank(message = "Specialization cannot be blank") String specialization,
 			@NotBlank(message = "Gender cannot be blank") @Pattern(regexp = "Male|Female|Other", message = "Gender must be Male, Female, or Other") String gender,
 			@NotEmpty(message = "Available days cannot be empty") List<@Pattern(regexp = "Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday", message = "Invalid day") String> availableDays,
@@ -50,6 +50,7 @@ public class DoctorScheduleDTO {
 			@NotBlank(message = "Contact number cannot be blank") @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid Indian contact number") String contact,
 			@Min(value = 0, message = "Experience must be non-negative") int experience) {
 		super();
+		this.doctorId = doctorId;
 		this.doctorName = doctorName;
 		this.specialization = specialization;
 		this.gender = gender;
@@ -58,6 +59,14 @@ public class DoctorScheduleDTO {
 		this.email = email;
 		this.contact = contact;
 		this.experience = experience;
+	}
+
+	public Long getDoctorId() {
+		return doctorId;
+	}
+
+	public void setDoctorId(Long doctorId) {
+		this.doctorId = doctorId;
 	}
 
 	public String getDoctorName() {

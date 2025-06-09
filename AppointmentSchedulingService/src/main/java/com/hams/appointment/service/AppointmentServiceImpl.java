@@ -14,14 +14,13 @@ import com.hams.appointment.dto.AppointmentDTO;
 import com.hams.appointment.dto.AppointmentPatientRequestDTO;
 import com.hams.appointment.dto.AppointmentPatientResponseDTO;
 import com.hams.appointment.dto.DoctorScheduleToAppointmentDTO;
-import com.hams.appointment.dto.NotificationDTO;
 import com.hams.appointment.dto.PatientProfile;
 import com.hams.appointment.exception.AppointmentNotFoundException;
 import com.hams.appointment.exception.DoctorNotAvailableException;
 import com.hams.appointment.exception.InvalidDoctorException;
 import com.hams.appointment.exception.InvalidPatientException;
 import com.hams.appointment.feignclient.DoctorClient;
-import com.hams.appointment.feignclient.NotificationClient;
+import com.hams.appointment.feignclient.MailClient;
 import com.hams.appointment.feignclient.PatientClient;
 import com.hams.appointment.model.Appointment;
 import com.hams.appointment.repository.AppointmentRepository;
@@ -41,23 +40,27 @@ public class AppointmentServiceImpl implements AppointmentService {
 	private DoctorClient doctorClient;
 
 	@Autowired
-	private NotificationClient notificationClient;
+	private MailClient mailClient;
 
 	@Override
 	public String saveAppointment(AppointmentPatientRequestDTO requestDTO) {
 		AppointmentDTO dto = requestDTO.getAppointment();
 
 		// 1. Validate Patient ID
-		PatientProfile patient;
-		try {
-			patient = patientClient.getPatientById(dto.getPatientId());
-		} catch (Exception e) {
-			throw new InvalidPatientException("Invalid Patient ID: " + dto.getPatientId());
-		}
+		
+//		int patientId;
+//		PatientProfile patient= patientClient.getPatient(patientId);
+		
+//		try {
+//			 
+//		} catch (Exception e) {
+//			throw new InvalidPatientException("Invalid Patient ID: " + dto.getPatientId());
+//		}
 
 		// 2. Validate Doctor ID
 		DoctorScheduleToAppointmentDTO doctor;
 		try {
+			System.out.println("Doctor Id In Service:"+dto.getDoctorId());
 			doctor = doctorClient.getDoctorById(dto.getDoctorId());
 			System.out.println(doctor);
 		} catch (Exception e) {
@@ -102,13 +105,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 		repo.save(a);
 
 		// 7. Send Notification
-		NotificationDTO notification = new NotificationDTO();
-		notification.setPatientId(patient.getPatientId());
-		notification.setPatientEmail(patient.getEmail());
-		notification.setMessage("Dear " + patient.getName() + ", your appointment with Doctor ID " + dto.getDoctorId()
-				+ " is confirmed for " + dto.getAppointmentDateTime().toString());
-
-		notificationClient.sendNotification(notification);
+		String msg="Your appointment has been scheduled on "+dto.getAppointmentDateTime()+" at RK Hospital";
+		mailClient.sendEmail("keerthikeerthir27@gmail.com","RK Appointment Booking",msg);
 
 		return "Appointment Saved Successfully";
 	}
@@ -230,4 +228,42 @@ public class AppointmentServiceImpl implements AppointmentService {
 		// Retrieve doctors by specialization using DoctorClient
 		return doctorClient.getSchedulesBySpecialization(specialization);
 	}
+
+	@Override
+	public List<AppointmentPatientResponseDTO> getAppointmentsByPatientId(int patientId) {
+		 List<Appointment> list = repo.findByPatientId(patientId);
+		 
+		    if (list.isEmpty()) {
+		        throw new AppointmentNotFoundException("No appointments found for Patient ID: " + patientId);
+		    }
+		 
+		    List<AppointmentPatientResponseDTO> dtos = new ArrayList<>();
+		 
+		    for (Appointment a : list) {
+		        AppointmentDTO dto = new AppointmentDTO();
+		        dto.setId(a.getId());
+		        dto.setPatientId(a.getPatientId());
+		        dto.setDoctorId(a.getDoctorId());
+		        dto.setAppointmentDateTime(a.getAppointmentDateTime());
+		        dto.setReason(a.getReason());
+		        dto.setStatus(a.getStatus());
+		 
+		        PatientProfile patient = patientClient.getPatientById(a.getPatientId());
+		        DoctorScheduleToAppointmentDTO doctor = doctorClient.getDoctorById(a.getDoctorId());
+		 
+		        AppointmentPatientResponseDTO response = new AppointmentPatientResponseDTO();
+		        response.setAppointment(dto);
+		        response.setPatient(patient);
+		        response.setDoctor(doctor);
+		 
+		        dtos.add(response);
+		    }
+		 
+		    return dtos;
+	}
+	
+//	public List<AppointmentDTO> getAppointmentsByPatientId(int patientId) {
+//	    return repo.findByPatientId(patientId);
+//	}
 }
+ 

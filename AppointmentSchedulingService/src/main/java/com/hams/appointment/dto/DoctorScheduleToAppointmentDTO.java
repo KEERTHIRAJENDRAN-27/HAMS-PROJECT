@@ -1,7 +1,7 @@
 package com.hams.appointment.dto;
 
 public class DoctorScheduleToAppointmentDTO {
-
+	private Long doctorId;
 	private String doctorName;
 
 	private String specialization;
@@ -21,9 +21,12 @@ public class DoctorScheduleToAppointmentDTO {
 		return availableTime;
 	}
 
-	public DoctorScheduleToAppointmentDTO(String doctorName, String specialization, String gender, String availableDays,
-			String availableTime, String email, String contact, int experience) {
+
+
+	public DoctorScheduleToAppointmentDTO(Long doctorId, String doctorName, String specialization, String gender,
+			String availableDays, String availableTime, String email, String contact, int experience) {
 		super();
+		this.doctorId = doctorId;
 		this.doctorName = doctorName;
 		this.specialization = specialization;
 		this.gender = gender;
@@ -48,6 +51,14 @@ public class DoctorScheduleToAppointmentDTO {
 
 	public String getDoctorName() {
 		return doctorName;
+	}
+
+	public Long getDoctorId() {
+		return doctorId;
+	}
+
+	public void setDoctorId(Long doctorId) {
+		this.doctorId = doctorId;
 	}
 
 	public void setDoctorName(String doctorName) {

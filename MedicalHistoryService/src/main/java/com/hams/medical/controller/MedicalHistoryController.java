@@ -21,7 +21,7 @@ import com.hams.medical.service.MedicalHistoryService;
 
 @RestController
 @RequestMapping("/medicalHistory")
-@CrossOrigin("*")
+//@CrossOrigin("*")
 public class MedicalHistoryController {
 
 	@Autowired

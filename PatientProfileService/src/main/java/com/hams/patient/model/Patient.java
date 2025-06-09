@@ -19,7 +19,7 @@ import jakarta.validation.constraints.Size;
 @Table(name = "patient")
 public class Patient {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+//	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long patientId;
 
 	@NotBlank(message = "Patient name is required")
@@ -54,8 +54,15 @@ public class Patient {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Patient(Long patientId, String name, int age, String bloodGroup, String gender, LocalDate dateOfBirth,
-			String medicalHistory, @Email(message = "Invalid email format") String email, String contactDetails) {
+	public Patient(Long patientId,
+			@NotBlank(message = "Patient name is required") @Size(max = 50, message = "Patient name should not exceed 50 characters") String name,
+			@NotNull(message = "Age cannot be null") @Positive(message = "Age must be positive") int age,
+			@NotBlank(message = "Blood group is required") @Pattern(regexp = "^(A|B|AB|O)[+-]$", message = "Invalid blood group format") String bloodGroup,
+			@NotBlank(message = "Gender is required") @Pattern(regexp = "Male|Female|Other", message = "Gender must be Male, Female, or Other") String gender,
+			@Past(message = "Date of Birth must be in the past") @NotNull(message = "Date of birth is required") LocalDate dateOfBirth,
+			@Size(max = 500, message = "Medical history should not exceed 500 characters") String medicalHistory,
+			@Email(message = "Invalid email format") String email,
+			@Pattern(regexp = "^\\d{10}$", message = "Contact number must be a 10-digit number") String contactDetails) {
 		super();
 		this.patientId = patientId;
 		this.name = name;
@@ -66,14 +73,6 @@ public class Patient {
 		this.medicalHistory = medicalHistory;
 		this.email = email;
 		this.contactDetails = contactDetails;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
 	}
 
 	public Long getPatientId() {
@@ -132,6 +131,14 @@ public class Patient {
 		this.medicalHistory = medicalHistory;
 	}
 
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	public String getContactDetails() {
 		return contactDetails;
 	}
@@ -139,5 +146,7 @@ public class Patient {
 	public void setContactDetails(String contactDetails) {
 		this.contactDetails = contactDetails;
 	}
-
+	
+	
+	
 }

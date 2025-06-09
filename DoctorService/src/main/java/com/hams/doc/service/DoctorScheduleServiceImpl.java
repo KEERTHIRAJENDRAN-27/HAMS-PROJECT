@@ -25,17 +25,22 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
 
 	@Override
 	public String addSchedule(DoctorScheduleDTO dto) {
-		List<DoctorSchedule> existing = repository.findBySpecialization(dto.getSpecialization());
-		boolean exists = existing.stream().anyMatch(doc -> doc.getDoctorName().equalsIgnoreCase(dto.getDoctorName())
-				&& doc.getEmail().equalsIgnoreCase(dto.getEmail()));
-		if (exists) {
-			throw new DoctorAlreadyExistsException("Doctor with same name and email already exists.");
-		}
+	    List<DoctorSchedule> existingDoctors = repository.findAll(); // Fetch all existing doctors
+	    
+	    boolean exists = existingDoctors.stream().anyMatch(doc ->
+	        doc.getEmail().equalsIgnoreCase(dto.getEmail()) ||
+	        doc.getContact().equals(dto.getContact()) // Check both email and contact number
+	    );
 
-		DoctorSchedule schedule = mapToEntity(dto);
-		repository.save(schedule);
-		return "Doctor schedule added successfully.";
+	    if (exists) {
+	        throw new DoctorAlreadyExistsException("Doctor with the same email or contact number already exists.");
+	    }
+
+	    DoctorSchedule schedule = mapToEntity(dto);
+	    repository.save(schedule);
+	    return "Doctor schedule added successfully.";
 	}
+
 
 	@Override
 	public String updateSchedule(Long doctorId, DoctorScheduleDTO dto) {
@@ -49,6 +54,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
 
 	@Override
 	public DoctorSchedule getById(Long doctorId) {
+		System.out.println("Doctor Id :"+doctorId);
 		return repository.findById(doctorId)
 				.orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
 	}
@@ -111,6 +117,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
 	}
 
 	private void updateEntity(DoctorSchedule entity, DoctorScheduleDTO dto) {
+		entity.setDoctorId(dto.getDoctorId());
 		entity.setDoctorName(dto.getDoctorName());
 		entity.setSpecialization(dto.getSpecialization());
 		entity.setGender(dto.getGender());
