@@ -104,9 +104,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 		a.setStatus(dto.getStatus());
 		repo.save(a);
 
+		
 		// 7. Send Notification
-		String msg="Your appointment has been scheduled on "+dto.getAppointmentDateTime()+" at RK Hospital";
-		mailClient.sendEmail("keerthikeerthir27@gmail.com","RK Appointment Booking",msg);
+//		String msg="Your appointment has been scheduled on "+dto.getAppointmentDateTime()+" at RK Hospital";
+//		mailClient.sendEmail("keerthikeerthir27@gmail.com","RK Appointment Booking",msg);
 
 		return "Appointment Saved Successfully";
 	}
